@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="node_modules/angular/angular.js"></script>
+    <script src="node_modules/cucumber/dist/cucumber.js"></script>
+    <script src="node_modules/chai/chai.js"></script>
+</head>
+<body>
+<div id="app">
+    <div ng-controller="HelloController">
+        <h2>{{message}}</h2>
+    </div>
+</div>
+</body>
+<script>
+  var app = angular.module("app", []);
+  app.controller("HelloController", function ($scope) {
+    $scope.message = "Hello, Matt";
+  });
+</script>
+<script>
+    var featureSource = `
+Feature: Test
+
+    Scenario: Test
+        When I open the app
+        Then I should see "Hello, AngularJS"
+    `
+    var eventBroadcaster = {
+      emit: (name, data) => {
+        console.log(name, data)
+      }
+    }
+    var testCases = Cucumber.getTestCases({
+      eventBroadcaster: eventBroadcaster,
+      pickleFilter: new Cucumber.PickleFilter({}),
+      source: featureSource,
+      uri: '/feature'
+    });
+
+    Cucumber.supportCodeLibraryBuilder.reset('');
+    var Then = Cucumber.Then
+    var When = Cucumber.When
+    var expect = chai.expect
+
+    When(/I open the app/, () => {
+      angular.bootstrap(document.getElementById('app'), ['app'])
+    })
+    Then(/I should see "Hello, Matt"/, () => {
+      expect(document.getElementsByTagName('h2')[0].textContent).to.eql("Hello, Matt")
+    })
+
+
+    var supportCodeLibrary = Cucumber.supportCodeLibraryBuilder.finalize();
+    var runtime = new Cucumber.Runtime({
+      eventBroadcaster: eventBroadcaster,
+      options: {},
+      testCases: testCases,
+      supportCodeLibrary: supportCodeLibrary
+    });
+
+    runtime.start().then((success) => {
+      console.log(`result: ${success ? 'pass!' : 'fail :('}`)
+    })
+</script>
+</html>
