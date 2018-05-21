@@ -1,22 +1,14 @@
 const angular = require('angular')
+const fs = require('fs')
 const { expect } = require('chai')
 const { Before, When, Then } = require('cucumber')
 
 let $scope
 
 Before(() => {
-  $scope = document.createElement('div')
-  $scope.innerHTML = `<div id="app">
-    <div ng-controller="HelloController">
-      <h2>{{message}}</h2>
-    </div>
-  </div>`
-  document.body.appendChild($scope)
-
-  const app = angular.module("app", []);
-  app.controller("HelloController", function ($scope) {
-    $scope.message = "Hello, Angular";
-  });
+  const html = fs.readFileSync('./index.html', "utf8")
+  document.write(html)
+  $scope = document.getElementById('app')
 })
 
 When(/I open the app/, () => {
