@@ -1,20 +1,42 @@
 const angular = require('angular')
 const fs = require('fs')
 const { expect } = require('chai')
-const { Before, When, Then } = require('cucumber')
+const { Before, After, When, Then } = require('cucumber')
 
-let $scope
+const path = require('path')
+const absoluteIndexPath = indexPath =>
+  path.join(process.cwd(), indexPath)
 
-Before(() => {
-  const html = fs.readFileSync('./index.html', "utf8")
-  document.write(html)
-  $scope = document.getElementById('app')
+const relativeIndexPath = indexPath =>
+  path.relative(
+    require.resolve('cucumber-electron'),
+    absoluteIndexPath(indexPath)
+  )
+
+const openApp = async (indexPath) => 
+  new Promise(resolve => {
+    const frame = document.createElement('iframe')
+    frame.onload = () => {
+      resolve(frame)
+    }
+    frame.src = relativeIndexPath(indexPath)
+    console.log(frame.src)
+    document.body.appendChild(frame)
+  })
+
+Before(async () => {
+  this.frame = await openApp("./index.html") 
+  this.app = this.frame.contentWindow
 })
 
-When(/I open the app/, () => {
-  angular.bootstrap($scope.querySelector('#app'), ['app'])
+After(() => {
+  document.body.removeChild(this.frame)
+})
+
+When(/I open the app/, async () => {
 })
 
 Then(/I should see "Hello, Matt"/, () => {
-  expect($scope.querySelector('h2').textContent).to.eql("Hello, Matt")
+  console.log(this.app.angular)
+  expect(this.app.document.querySelector('h2').textContent).to.eql("Hello, Matt")
 })
