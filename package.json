@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "angular": "^1.6.10",
+    "angular": "^1.8.0",
     "chai": "^4.1.2",
     "cucumber": "^4.2.1"
   }
